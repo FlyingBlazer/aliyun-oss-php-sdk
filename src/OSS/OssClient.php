@@ -2350,6 +2350,28 @@ class OssClient
     }
 
     /**
+     * Async processes the object
+     *
+     * @param string $bucket bucket name
+     * @param string $object object name
+     * @param string $process process script
+     * @return string process result, json format
+     */
+    public function asyncProcessObject($bucket, $object, $process, $options = NULL)
+    {
+        $this->precheckCommon($bucket, $object, $options);
+        $options[self::OSS_BUCKET] = $bucket;
+        $options[self::OSS_METHOD] = self::OSS_HTTP_POST;
+        $options[self::OSS_OBJECT] = $object;
+        $options[self::OSS_SUB_RESOURCE] = self::OSS_ASYNC_PROCESS;
+        $options[self::OSS_CONTENT_TYPE] = 'application/xml';
+        $options[self::OSS_CONTENT] = self::OSS_ASYNC_PROCESS.'='.$process;
+        $response = $this->auth($options);
+        $result = new BodyResult($response);
+        return $result->getData();
+    }
+
+    /**
      * Gets the part size according to the preferred part size.
      * If the specified part size is too small or too big, it will return a min part or max part size instead.
      * Otherwise returns the specified part size.
@@ -3364,6 +3386,7 @@ class OssClient
             self::OSS_LIVE_CHANNEL_START_TIME,
             self::OSS_LIVE_CHANNEL_END_TIME,
             self::OSS_PROCESS,
+            self::OSS_ASYNC_PROCESS,
             self::OSS_POSITION,
             self::OSS_SYMLINK,
             self::OSS_RESTORE,
@@ -3699,6 +3722,7 @@ class OssClient
     const OSS_OBJECT_COPY_SOURCE = 'x-oss-copy-source';
     const OSS_OBJECT_COPY_SOURCE_RANGE = "x-oss-copy-source-range";
     const OSS_PROCESS = "x-oss-process";
+    const OSS_ASYNC_PROCESS = "x-oss-async-process";
     const OSS_CALLBACK = "x-oss-callback";
     const OSS_CALLBACK_VAR = "x-oss-callback-var";
     const OSS_REQUEST_PAYER = "x-oss-request-payer";
